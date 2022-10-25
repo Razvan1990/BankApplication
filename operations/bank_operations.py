@@ -33,7 +33,7 @@ class BankOperations:
                 #create new file
             self.helperThings.modify_bank_details(dictionary_full)
         elif user_input=="back":
-            return
+            return dictionary_client
         return dictionary_client
 
 
@@ -76,7 +76,7 @@ class BankOperations:
                             break
             self.helperThings.modify_bank_details(dictionary_full)
         elif user_input=="back":
-            return
+            return dictionary_client
         return dictionary_client
 
     def retreat_cash(self, dictionary_full, dictionary_client):
@@ -116,7 +116,7 @@ class BankOperations:
                             break
             self.helperThings.modify_bank_details(dictionary_full)
         elif user_input=="back":
-            return
+            return dictionary_client
         return dictionary_client
 
     def get_receipt(self, client_dictionary):
