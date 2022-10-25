@@ -1,0 +1,8 @@
+25-10-2022   19:34:23
+ATM PUFOSEI HOUSE, str. Piata Republicii, nr 6, bl T850, Gura Humorului, Suceava
+###########################################################################
+PIN:0XXX
+NUME:UNGUREANU ELENA
+SUMA DISPONIBILA:218100
+DATA EXPIRARE:07/25
+NUMAR CARD:XXXXXXXXXXXXXXXX1105
