@@ -21,25 +21,29 @@ class Computation:
             print("3. Retrieve cash")
             print("4. Change PIN number")
             print("5. Get receipt info")
-            print("6. Exit")
+            print("6. Acount cash transfer")
+            print("7. Exit")
             x = int(input(""))
-            while x < 0 or x > 7:
+            while x < 0 or x > 8:
                 print("Not a valid option on ATM")
                 x = int(input(""))
             if x == 1:
-                self.banker.cash_interogation(client_dictionary)
+                self.banker.cash_interogation(database_dictionary, client_dictionary)
                 time.sleep(1)
             if x == 2:
-                client_dictionary=self.banker.add_cash(database_dictionary, client_dictionary)
+                client_dictionary = self.banker.add_cash(database_dictionary, client_dictionary)
                 time.sleep(1)
             if x == 3:
-                client_dictionary=self.banker.retreat_cash(database_dictionary, client_dictionary)
+                client_dictionary = self.banker.retreat_cash(database_dictionary, client_dictionary)
                 time.sleep(1)
             if x == 4:
-                client_dictionary=self.banker.change_PIN_number(database_dictionary, client_dictionary)
+                client_dictionary = self.banker.change_PIN_number(database_dictionary, client_dictionary)
                 time.sleep(1)
             if x == 5:
-                self.banker.get_receipt(client_dictionary)
+                self.banker.get_receipt(database_dictionary, client_dictionary)
                 time.sleep(1)
             if x == 6:
+                self.banker.transfer_money_accounts(database_dictionary, client_dictionary)
+                time.sleep(1)
+            if x == 7:
                 break
