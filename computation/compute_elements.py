@@ -22,9 +22,11 @@ class Computation:
             print("4. Change PIN number")
             print("5. Get receipt info")
             print("6. Acount cash transfer")
-            print("7. Exit")
+            print("7. Pay bills")
+            print("8. Western union")
+            print("9. Exit")
             x = int(input(""))
-            while x < 0 or x > 8:
+            while x < 0 or x > 9:
                 print("Not a valid option on ATM")
                 x = int(input(""))
             if x == 1:
@@ -45,5 +47,11 @@ class Computation:
             if x == 6:
                 self.banker.transfer_money_accounts(database_dictionary, client_dictionary)
                 time.sleep(1)
-            if x == 7:
+            if x==7:
+                self.banker.pay_bills(database_dictionary,client_dictionary)
+                time.sleep(1)
+            if x ==8:
+                self.banker.transfer_money_abroad(database_dictionary,client_dictionary)
+                time.sleep(1)
+            if x == 9:
                 break

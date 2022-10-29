@@ -1,0 +1,9 @@
+28-10-2022   19:43:30
+ATM PUFOSEI HOUSE, str. Piata Republicii, nr 6, bl T850, Gura Humorului, Suceava
+###########################################################################
+
+XXXXXXXXXXXX2410
+PLATA FACTURA
+RATA_IPOTECARA
+
+SUMA		25
