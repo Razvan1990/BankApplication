@@ -1,10 +1,16 @@
 import os
 import sys
+import time
+from datetime import datetime
 
 from helper import constants
+from operations.bank_reader import BankReader
 
 
 class Helper:
+
+    def __init__(self):
+        self.bank_reader = BankReader()
 
     def print_bank_operation(self):
         x = int(input("Please introduce your option "))
@@ -18,8 +24,7 @@ class Helper:
         print('''Type "back" if you would like to cancel operation ''' + name_operation)
 
     def card_bank(self, dictionary_client):
-        if dictionary_client[constants.CARD_INFO[0]] != "0065" and dictionary_client[
-            constants.CARD_INFO[1]] != "UNGUREANU IOAN RAZVAN":
+        if dictionary_client[constants.CARD_INFO[0]] != "0065" and dictionary_client[constants.CARD_INFO[1]] != "UNGUREANU IOAN RAZVAN":
             return True
         else:
             return False
@@ -60,6 +65,22 @@ class Helper:
         if index == -1:
             return 3, index
         return 0, index
+
+    # from account number, but simpler to use in pay_bills method
+    def check_IBAN_number(self, account_number, correct_number1, *args):
+        counter_spaces = self.count_spaces(account_number)
+        if constants.NUMBER_SPACES_ACCOUNT != counter_spaces:
+            return 1
+        elif len(account_number) != 29:
+            return 2
+        elif args[1] == 3:
+            if account_number != correct_number1:
+                return 3
+        elif args[1] == 4:
+            if account_number != args[0]:
+                return 3
+        else:
+            return 0
 
     def modify_bank_details(self, dictionary_full):
         counter_values = 0
@@ -104,7 +125,7 @@ class Helper:
         return pin_introduced_new.isnumeric()
 
     # define here a function which creates a dictionary with the details for which we have the pin
-    def check_PIN_card(self, dictionary_bank):
+    def check_pin_card(self, dictionary_bank):
         working_dict = {}
         index_list = -1
         is_correct_pin = True
@@ -141,3 +162,200 @@ class Helper:
         else:
             print("Hello ", working_dict[constants.CARD_INFO[1]])
             return working_dict
+
+    def pay_eon_bill(self, option_client, dictionary_client, dictionary_full):
+        global dict_eon
+        are_valid_numbers = True
+        is_raifaissen = self.card_bank(dictionary_client)
+        if is_raifaissen:
+            print("Operation is 4 RON")
+        else:
+            print("Operation is 2 RON")
+        time.sleep(1)
+        if option_client == 1:
+            dict_eon = self.bank_reader.create_billing_dict(constants.EON_ELEC)
+        elif option_client == 2:
+            dict_eon = self.bank_reader.create_billing_dict(constants.EON_GAZ)
+        print("Introduce the client number")
+        print("__________")
+        client = input("")
+        while len(client) != 10 or not client.isnumeric():
+            print("Client number bill must have 10 characters and must be just numeric")
+            client = input("")
+        print("Introduce the bill number")
+        print("__________")
+        bill = input()
+        while len(bill) != 10 or not bill.isnumeric():
+            print("Bill number must have 10 characters and must be just numeric")
+            bill = input("")
+        while are_valid_numbers:
+            if client in dict_eon and bill in dict_eon[client]:
+                are_valid_numbers = False
+                print("Enter the amount to pay")
+                amount = int(input(""))
+                amount_available = dictionary_client[constants.CARD_INFO[2]]
+                amount_available_int = int(amount_available)
+                while amount_available_int - amount < 0:
+                    print("Not enough money on card")
+                    print("Introduce a smaller sum or cancel operation by pressing back")
+                    option2 = input("")
+                    if option2 == "back":
+                        return dictionary_client
+                    else:
+                        option2_int = int(option2)
+                        amount = option2_int
+                for key in dictionary_client:
+                    if key == constants.CARD_INFO[2]:
+                        for index, value in enumerate(dictionary_full[constants.CARD_INFO[5]]):
+                            if dictionary_client[constants.CARD_INFO[5]] == dictionary_full[constants.CARD_INFO[5]][index]:
+                                if is_raifaissen:
+                                    dictionary_client[constants.CARD_INFO[2]] = str(
+                                        amount_available_int - amount - constants.TAXES[1])
+                                    dictionary_full[constants.CARD_INFO[2]][index] = str(
+                                        amount_available_int - amount - 2 * constants.TAXES[1])
+                                    self.modify_bank_details(dictionary_full)
+                                    self.create_payment_bill_receipt(option_client, dictionary_client, amount)
+                                    break
+                                dictionary_client[constants.CARD_INFO[2]] = str(
+                                    amount_available_int - amount - constants.TAXES[1])
+                                dictionary_full[constants.CARD_INFO[2]][index] = str(
+                                    amount_available_int - amount - constants.TAXES[1])
+                                self.modify_bank_details(dictionary_full)
+                                self.create_payment_bill_receipt(option_client, dictionary_client, amount)
+                                break
+            else:
+                print("Client number and/or bill number invalid.Please re-type again")
+                print("__________")
+                client = input("client number ")
+                print("___________")
+                bill = input("bill number")
+        return dictionary_client
+
+    def pay_other_things(self, client_option, dictionary_client, dictionary_full):
+        global is_iban_ok
+        counter_tries = 0
+        is_raifaissen = self.card_bank(dictionary_client)
+        if is_raifaissen:
+            print("Operation is 4 RON")
+        else:
+            print("Operation is 2 RON")
+        time.sleep(1)
+        print("Introduce bank IBAN number")
+        print("____ ____ ____ ____ ____ ____")
+        iban_number = input("")
+        is_iban_ok = self.check_IBAN_number(iban_number, constants.FLAT_BILLS, constants.BANK_ACCOUNT, client_option)
+        while is_iban_ok == 1 or is_iban_ok == 2 or is_iban_ok == 3:
+            if counter_tries > 3:
+                print("Cancelling opeartion cause of too many tries...")
+                return dictionary_client
+            if is_iban_ok == 1:
+                print("Please introduce a space between every 4 digits")
+                iban_number = input("iban NUMBER ")
+                is_iban_ok = self.check_IBAN_number(iban_number, constants.FLAT_BILLS, constants.BANK_ACCOUNT,
+                                                    client_option)
+                counter_tries += 1
+            elif is_iban_ok == 2:
+                print("IBAN number should contain 24 digits. Please verify again and reintroduce")
+                iban_number = input(" iban NUMBER")
+                is_iban_ok = self.check_IBAN_number(iban_number, constants.FLAT_BILLS, constants.BANK_ACCOUNT,
+                                                    client_option)
+                counter_tries += 1
+            elif is_iban_ok == 3:
+                print("IBAN number is not the correct one for this transfer. Please recheck")
+                iban_number = input("iban NUMBER ")
+                is_iban_ok = self.check_IBAN_number(iban_number, constants.FLAT_BILLS, constants.BANK_ACCOUNT,
+                                                    client_option)
+                counter_tries += 1
+        print("Enter the amount to pay")
+        amount = int(input(""))
+        amount_available = dictionary_client[constants.CARD_INFO[2]]
+        amount_available_int = int(amount_available)
+        while amount_available_int - amount < 0:
+            print("Not enough money on card")
+            print("Introduce a smaller sum or cancel operation by pressing back")
+            option2 = input("")
+            if option2 == "back":
+                return dictionary_client
+            else:
+                option2_int = int(option2)
+                amount = option2_int
+        for key in dictionary_client:
+            if key == constants.CARD_INFO[2]:
+                for index, value in enumerate(dictionary_full[constants.CARD_INFO[5]]):
+                    if dictionary_client[constants.CARD_INFO[5]] == dictionary_full[constants.CARD_INFO[5]][index]:
+                        if is_raifaissen:
+                            dictionary_client[constants.CARD_INFO[2]] = str(
+                                amount_available_int - amount - constants.TAXES[1])
+                            dictionary_full[constants.CARD_INFO[2]][index] = str(
+                                amount_available_int - amount - 2 * constants.TAXES[1])
+                            self.modify_bank_details(dictionary_full)
+                            time.sleep(1)
+                            self.create_payment_bill_receipt(client_option, dictionary_client, amount)
+                            break
+                        dictionary_client[constants.CARD_INFO[2]] = str(
+                            amount_available_int - amount - constants.TAXES[1])
+                        dictionary_full[constants.CARD_INFO[2]][index] = str(
+                            amount_available_int - amount - constants.TAXES[1])
+                        self.modify_bank_details(dictionary_full)
+                        time.sleep(1)
+                        self.create_payment_bill_receipt(client_option, dictionary_client, amount)
+                        break
+
+        return dictionary_client
+
+    def create_payment_bill_receipt(self, client_option, dictionary_client, amount_paid):
+        name_opeartion = ""
+        masked_result_card_number = ""
+        now = datetime.now()
+        year = '{:02d}'.format(now.year)
+        month = '{:02d}'.format(now.month)
+        day = '{:02d}'.format(now.day)
+        hour = '{:02d}'.format(now.hour)
+        minute = '{:02d}'.format(now.minute)
+        seconds = '{:02d}'.format(now.second)
+        date_formated = day + "-" + month + "-" + year + "   " + hour + ":" + minute + ":" + seconds
+        if client_option == 1:
+            name_opeartion = constants.BILLING_NAMES[0]
+        elif client_option == 2:
+            name_opeartion = constants.BILLING_NAMES[1]
+        elif client_option == 3:
+            name_opeartion = constants.BILLING_NAMES[2]
+        elif client_option == 4:
+            name_opeartion = constants.BILLING_NAMES[3]
+        # get card_number
+        for key in dictionary_client:
+            if key == constants.CARD_INFO[4]:
+                card_number = dictionary_client[constants.CARD_INFO[4]]
+                card_number_trimed = card_number.replace(" ", "")
+                visible_number = card_number_trimed[-4:]
+                for i in range(0, len(card_number_trimed) - 4):
+                    masked_result_card_number += "X"
+                masked_result_card_number += visible_number
+        # make string
+        final_string = date_formated + '\n' + constants.NAME_BANK + '\n\n' + "CARD NUMBER:  " + masked_result_card_number + '\n' + "PLATA FACTURA" + '\n' + name_opeartion + '\n\n' + "SUMA\t\t" + str(
+            amount_paid) + " RON" + "\n\n" + "####################" + "THANK YOU!" + "####################"
+        file_path = constants.OUTPUT_PATH
+        filename_trimed = constants.OUTPUT_FILENAME[:-4]
+        filename_now = os.path.join(file_path, filename_trimed)
+        filename_final = filename_now + "_" + name_opeartion + ".txt"
+        with open(file=filename_final, mode="w", encoding="utf-8") as receipt_file:
+            receipt_file.write(final_string)
+        os.system(filename_final)
+
+    def calculate_conversion_currency(self, user_option, amount_transfered):
+        if user_option == 1:
+            result = amount_transfered / constants.DICTIONARY_CURRENCY[constants.NAMES_CURRENCY[0]]
+            print("You have transferred ", round(result, 2), end=" ")
+            print(constants.NAMES_CURRENCY_ABREVIATED[0])
+        if user_option == 2:
+            result = amount_transfered / constants.DICTIONARY_CURRENCY[constants.NAMES_CURRENCY[1]]
+            print("You have transferred ", round(result, 2), end=" ")
+            print(constants.NAMES_CURRENCY_ABREVIATED[1])
+        if user_option == 3:
+            result = amount_transfered / constants.DICTIONARY_CURRENCY[constants.NAMES_CURRENCY[2]]
+            print("You have transferred ", round(result, 2), end=" ")
+            print(constants.NAMES_CURRENCY_ABREVIATED[2])
+        if user_option == 4:
+            result = amount_transfered / constants.DICTIONARY_CURRENCY[constants.NAMES_CURRENCY[3]]
+            print("You have transferred ", round(result, 2), end=" ")
+            print(constants.NAMES_CURRENCY_ABREVIATED[3])
