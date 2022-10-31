@@ -81,6 +81,25 @@ class Helper:
                 return 3
         else:
             return 0
+        
+     def check_allowed_pin(self, dictionary_full, dictionary_client, introduced_pin_number):
+        helper_dict={}
+        name_client = dictionary_client[constants.CARD_INFO[1]]
+        bank_account_client = dictionary_client[constants.CARD_INFO[5]]
+        for key in dictionary_full:
+            if key == constants.CARD_INFO[1]:
+                for index, value in enumerate(dictionary_full[constants.CARD_INFO[1]]):
+                    if name_client == value and bank_account_client!=dictionary_full[constants.CARD_INFO[5]][index]:
+                        helper_dict.update({constants.CARD_INFO[0]:dictionary_full[constants.CARD_INFO[0]][index]})
+                        helper_dict.update({constants.CARD_INFO[1]: dictionary_full[constants.CARD_INFO[1]][index]})
+                        helper_dict.update({constants.CARD_INFO[2]: dictionary_full[constants.CARD_INFO[2]][index]})
+                        helper_dict.update({constants.CARD_INFO[3]: dictionary_full[constants.CARD_INFO[3]][index]})
+                        helper_dict.update({constants.CARD_INFO[4]: dictionary_full[constants.CARD_INFO[4]][index]})
+                        helper_dict.update({constants.CARD_INFO[5]: dictionary_full[constants.CARD_INFO[5]][index]})
+                        if helper_dict[constants.CARD_INFO[0]]==introduced_pin_number:
+                            return True
+        return False
+
 
     def modify_bank_details(self, dictionary_full):
         counter_values = 0
