@@ -20,13 +20,22 @@ class BankOperations:
             print("Enter new pin number")
             print("____")
             new_pin = input("")
-            while len(new_pin) != 4:
-                print("PIN must have 4 numbers. Try again")
-                new_pin = input("")
-            while not self.helper_things.check_if_pin_has_just_digits(new_pin):
-                print("PIN must contain just digits. Make sure to add digits")
-                new_pin = input()
-                self.helper_things.check_if_pin_has_just_digits(new_pin)
+            while len(new_pin) != 4 or not self.helper_things.check_if_pin_has_just_digits(
+                    new_pin) or self.helper_things.check_allowed_pin(dictionary_full, dictionary_client,new_pin) or new_pin == dictionary_client[constants.CARD_INFO[0]]:
+                if len(new_pin) != 4:
+                    print("PIN must have 4 numbers. Try again")
+                    new_pin = input("")
+                elif not self.helper_things.check_if_pin_has_just_digits(new_pin):
+                    print("PIN must contain just digits. Make sure to add digits")
+                    new_pin = input()
+                    self.helper_things.check_if_pin_has_just_digits(new_pin)
+                elif (self.helper_things.check_allowed_pin(dictionary_full, dictionary_client, new_pin)):
+                    print("Pin is already used on another of your cards. Please type a different pin")
+                    new_pin = input("")
+                    self.helper_things.check_allowed_pin(dictionary_full, dictionary_client, new_pin)
+                elif  (new_pin == dictionary_client[constants.CARD_INFO[0]]):
+                    print("PIN cannot be the same. Introduce a different pin")
+                    new_pin = input("")
             for key in dictionary_client:
                 if key == constants.CARD_INFO[0]:
                     for index, value in enumerate(dictionary_full[constants.CARD_INFO[5]]):
@@ -413,7 +422,8 @@ class BankOperations:
                     raise SystemError("Too many times tried to introduce unavailable transfer sum")
                 introduced_amount_transfer = int(input(""))
             while introduced_amount_transfer > 5000:
-                print("Amount is to large to transfer from ATM. Please go to your bank for values bigger than 5000 RON or re-introduce sum")
+                print(
+                    "Amount is to large to transfer from ATM. Please go to your bank for values bigger than 5000 RON or re-introduce sum")
                 print("1.Cancel operation")
                 print("2. Introduce another sum")
                 option = int(input(""))
@@ -426,27 +436,30 @@ class BankOperations:
                     introduced_amount_transfer = int(input("Introduce sum"))
             if self.helper_things.card_bank(dictionary_client):
                 for index, value in enumerate(dictionary_full[constants.CARD_INFO[1]]):
-                        if dictionary_client[constants.CARD_INFO[5]] == dictionary_full[constants.CARD_INFO[5]][index]:
-                            dictionary_client[constants.CARD_INFO[2]] = str(available_amount - (constants.TAXES[3] + 3) - introduced_amount_transfer)
-                            dictionary_full[constants.CARD_INFO[2]][index] = str(available_amount - (constants.TAXES[3] + 3) - introduced_amount_transfer)
-                            print("Transferring...")
-                            time.sleep(3)
-                            print("Transfer success")
-                            self.helper_things.calculate_conversion_currency(option, introduced_amount_transfer)
-                            self.helper_things.modify_bank_details(dictionary_full)
-                            break
+                    if dictionary_client[constants.CARD_INFO[5]] == dictionary_full[constants.CARD_INFO[5]][index]:
+                        dictionary_client[constants.CARD_INFO[2]] = str(
+                            available_amount - (constants.TAXES[3] + 3) - introduced_amount_transfer)
+                        dictionary_full[constants.CARD_INFO[2]][index] = str(
+                            available_amount - (constants.TAXES[3] + 3) - introduced_amount_transfer)
+                        print("Transferring...")
+                        time.sleep(3)
+                        print("Transfer success")
+                        self.helper_things.calculate_conversion_currency(option, introduced_amount_transfer)
+                        self.helper_things.modify_bank_details(dictionary_full)
+                        break
             else:
                 for index, value in enumerate(dictionary_full[constants.CARD_INFO[1]]):
-                        if dictionary_client[constants.CARD_INFO[5]] == dictionary_full[constants.CARD_INFO[5]][index]:
-                            dictionary_client[constants.CARD_INFO[2]] = str(available_amount - constants.TAXES[3]  - introduced_amount_transfer)
-                            dictionary_full[constants.CARD_INFO[2]][index] = str(available_amount - constants.TAXES[3]  - introduced_amount_transfer)
-                            print("Transferring...")
-                            time.sleep(3)
-                            print("Transfer success")
-                            self.helper_things.calculate_conversion_currency(option, introduced_amount_transfer)
-                            self.helper_things.modify_bank_details(dictionary_full)
-                            break
+                    if dictionary_client[constants.CARD_INFO[5]] == dictionary_full[constants.CARD_INFO[5]][index]:
+                        dictionary_client[constants.CARD_INFO[2]] = str(
+                            available_amount - constants.TAXES[3] - introduced_amount_transfer)
+                        dictionary_full[constants.CARD_INFO[2]][index] = str(
+                            available_amount - constants.TAXES[3] - introduced_amount_transfer)
+                        print("Transferring...")
+                        time.sleep(3)
+                        print("Transfer success")
+                        self.helper_things.calculate_conversion_currency(option, introduced_amount_transfer)
+                        self.helper_things.modify_bank_details(dictionary_full)
+                        break
         elif user_input == "back":
             return dictionary_client
         return dictionary_client
-
