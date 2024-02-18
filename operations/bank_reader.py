@@ -6,7 +6,7 @@ from helper import constants
 class BankReader:
 
     def __init__(self):
-        self.list_accounts=[]
+        self.list_accounts = []
         self.bank_dict = dict()
         self.list_split = list()
 
@@ -46,9 +46,10 @@ class BankReader:
     def create_billing_dict(self, filename):
         global eon_details
         try:
-            dict_client_bills_pair ={}
-            list_numbers =[]
-            list_bills=[];list_clients =[]
+            dict_client_bills_pair = {}
+            list_numbers = []
+            list_bills = []
+            list_clients = []
             eon_details = open(filename, mode="r", encoding="utf-8")
             list_lines = eon_details.readlines()
             for line in list_lines:
@@ -59,17 +60,15 @@ class BankReader:
                         list_numbers.append(word)
                     else:
                         list_numbers.append(word)
-            for i in range (0, len(list_numbers)):
-                if i %2==1:
+            for i in range(0, len(list_numbers)):
+                if i % 2 == 1:
                     list_individual_bill_number = list_numbers[i].split(" ")
                     list_bills.append(list_individual_bill_number)
-            for i in range (0, len(list_numbers)):
-                if i%2==0:
+            for i in range(0, len(list_numbers)):
+                if i % 2 == 0:
                     list_clients.append(list_numbers[i])
-            index_list =0
             for i in range(0, len(list_clients)):
-                    dict_client_bills_pair.update({list_clients[i]:list_bills[index_list]})
-                    index_list+=1
+                dict_client_bills_pair.update({list_clients[i]: list_bills[i]})
             return dict_client_bills_pair
         except:
             raise FileNotFoundError
@@ -92,7 +91,3 @@ class BankReader:
             raise FileNotFoundError
         finally:
             file_accounts.close()
-
-
-
-

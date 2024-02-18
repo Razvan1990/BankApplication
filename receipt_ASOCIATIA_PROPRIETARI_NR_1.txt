@@ -1,11 +1,11 @@
-18-02-2024   17:46:45
+18-02-2024   17:45:59
 ATM PUFOSEI HOUSE, str. Vasile Alecsandri, bl B1, sc.A, Gura Humorului, Suceava
 ###########################################################################
 
 CARD NUMBER:  XXXXXXXXXXXX2410
 PLATA FACTURA
-EON_ENERGIE_ROMANIA
+ASOCIATIA_PROPRIETARI_NR_1
 
-SUMA		216 RON
+SUMA		25 RON
 
 ####################THANK YOU!####################
